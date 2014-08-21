@@ -1,3 +1,4 @@
+import copy
 import random
 
 TYPES = (
@@ -13,7 +14,7 @@ TYPES = (
 class Falling(object):
     """A falling block"""
     def __init__(self):
-       self.coordinates = random.choice(TYPES)
+        self.coordinates = copy.deepcopy(random.choice(TYPES))
 
     def __repr__(self):
         return "<{0}.{1} object at {2}>".format(
@@ -34,11 +35,11 @@ class Falling(object):
         zero = self.coordinates[0]
         for i, coord in enumerate(self.coordinates):
             # move back to origin
-            x = coord[0] - zero[0]
-            y = coord[1] - zero[1]
+            x_old = coord[0] - zero[0]
+            y_old = coord[1] - zero[1]
             # rotate
-            x = -y
-            y = x
+            x = -y_old
+            y = x_old
             # move back to original position
             x = x + zero[0]
             y = y + zero[1]

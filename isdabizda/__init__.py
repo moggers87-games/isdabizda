@@ -31,7 +31,12 @@ while True:
             pygame.quit()
             sys.exit()
         elif event.type == MOUSEBUTTONDOWN:
+            if event.button == 1:
+                grid.drop_block()
+            elif event.button == 3:
+                grid.rotate_block()
+            else:
+                continue
             grid.draw_grid(DISPLAY_SURF)
             pygame.display.flip()
     clock.tick(FPS)
-    print clock.get_fps()

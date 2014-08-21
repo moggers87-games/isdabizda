@@ -43,23 +43,25 @@ class Grid(object):
                 tile = Tile(x, y, tile_size)
                 column.append(tile)
 
+        self._falling = Falling()
+        self._falling.rel_move((1, self.sizes[0]/2))
+
     def colourise(self, coord, colour):
         for x, y in coord:
             tile = self._grid[y][x]
             tile.colour = colour
 
     def drop_block(self):
-        if self._falling is not None:
-            old_pos = self._falling.coordinates
-            self.colourise(old_pos, (0, 0, 0))
-            self._falling.rel_move((1, 0))
-        else:
-            self._falling = Falling()
-            self._falling.rel_move((1, self.sizes[0]/2))
+        self.colourise(self._falling.coordinates, (0, 0, 0))
+        self._falling.rel_move((1, 0))
+        self.colourise(self._falling.coordinates, (255, 255, 255))
+
+    def rotate_block(self):
+        self.colourise(self._falling.coordinates, (0, 0, 0))
+        self._falling.rotate()
         self.colourise(self._falling.coordinates, (255, 255, 255))
 
     def draw_grid(self, screen):
-        self.drop_block()
         for column in self._grid:
             for tile in column:
                 draw.rect(screen, tile.colour, tile)
