@@ -24,23 +24,33 @@ class Falling(object):
                 )
 
     def rel_move(self, vector):
-        """Move block by (x,y) tiles"""
+        """Move block by (y, x) tiles"""
         for i, coord in enumerate(self.coordinates):
-            x = coord[0] + vector[0]
-            y = coord[1] + vector[1]
-            self.coordinates[i] = (x, y)
+            y = coord[0] + vector[0]
+            x = coord[1] + vector[1]
+            self.coordinates[i] = (y, x)
 
-    def rotate(self):
-        """Rotate 90 deg anti-clockwise"""
+    def rotate(self, clockwise=True):
+        """Rotate 90 degrees of arc
+
+        If `clockwise=True`, rotate clockwise, if `False` then rotate
+        counter-clockwise.
+        """
+        if clockwise:
+            rot_vector = (1,-1)
+        else:
+            rot_vector = (-1,1)
         zero = self.coordinates[0]
         for i, coord in enumerate(self.coordinates):
             # move back to origin
-            x_old = coord[0] - zero[0]
-            y_old = coord[1] - zero[1]
+            y_old = coord[0] - zero[0]
+            x_old = coord[1] - zero[1]
+
             # rotate
-            x = -y_old
-            y = x_old
+            y = x_old * rot_vector[1]
+            x = y_old * rot_vector[0]
+
             # move back to original position
-            x = x + zero[0]
-            y = y + zero[1]
-            self.coordinates[i] = (x, y)
+            y = y + zero[0]
+            x = x + zero[1]
+            self.coordinates[i] = (y, x)
