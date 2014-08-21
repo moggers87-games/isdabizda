@@ -12,7 +12,7 @@ grid = Grid(SMALL)
 RES = grid.sizes[0] * grid.sizes[1]
 RES = (RES,RES)
 TITLE = "Isdabizda!"
-FPS = 30
+FPS = 15
 
 
 DISPLAY_SURF = pygame.display.set_mode(RES)
@@ -20,9 +20,11 @@ pygame.display.set_caption(TITLE)
 
 clock = pygame.time.Clock()
 
-# draw prettiness :D
-grid.draw_grid(DISPLAY_SURF)
-pygame.display.flip()
+def update_display():
+    grid.draw_grid(DISPLAY_SURF)
+    pygame.display.flip()
+
+update_display()
 
 # loop
 while True:
