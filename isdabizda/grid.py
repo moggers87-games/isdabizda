@@ -45,15 +45,30 @@ class Grid(object):
 
         self._falling = Falling()
         self._falling.rel_move((1, self.sizes[0]/2))
+        self.colourise(self._falling.coordinates, (255, 255, 255))
 
     def colourise(self, coord, colour):
         for x, y in coord:
+            if x < 0:
+                continue
+            elif y < 0:
+                raise IndexError("list index out of range")
             tile = self._grid[y][x]
             tile.colour = colour
 
-    def drop_block(self):
+    def move_down(self):
         self.colourise(self._falling.coordinates, (0, 0, 0))
         self._falling.rel_move((1, 0))
+        self.colourise(self._falling.coordinates, (255, 255, 255))
+
+    def move_left(self):
+        self.colourise(self._falling.coordinates, (0, 0, 0))
+        self._falling.rel_move((0, -1))
+        self.colourise(self._falling.coordinates, (255, 255, 255))
+
+    def move_right(self):
+        self.colourise(self._falling.coordinates, (0, 0, 0))
+        self._falling.rel_move((0, 1))
         self.colourise(self._falling.coordinates, (255, 255, 255))
 
     def rotate_block(self):
