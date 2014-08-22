@@ -36,39 +36,42 @@ class Grid(object):
         self._grid = []
         self._falling = None
 
-        for x in xrange(grid_size[0]):
-            column = []
-            self._grid.append(column)
-            for y in xrange(grid_size[1]):
+        for y in xrange(grid_size[0]):
+            row = []
+            self._grid.append(row)
+            for x in xrange(grid_size[1]):
                 tile = Tile(x, y, tile_size)
-                column.append(tile)
+                row.append(tile)
 
         self._falling = Falling()
-        self._falling.rel_move((1, self.sizes[0]/2))
+        self._falling.rel_move((self.sizes[0]/2, 1))
         self.colourise(self._falling.coordinates, (255, 255, 255))
 
-    def colourise(self, coord, colour):
-        for x, y in coord:
-            if x < 0:
+    def colourise(self, coords, colour):
+        for x, y in coords:
+            if y < 0:
                 continue
-            elif y < 0:
+            elif x < 0:
                 raise IndexError("list index out of range")
-            tile = self._grid[y][x]
+            tile = self.get_tile(x, y)
             tile.colour = colour
+
+    def get_tile(self, x, y):
+        return self._grid[y][x]
 
     def move_down(self):
         self.colourise(self._falling.coordinates, (0, 0, 0))
-        self._falling.rel_move((1, 0))
+        self._falling.rel_move((0, 1))
         self.colourise(self._falling.coordinates, (255, 255, 255))
 
     def move_left(self):
         self.colourise(self._falling.coordinates, (0, 0, 0))
-        self._falling.rel_move((0, -1))
+        self._falling.rel_move((-1, 0))
         self.colourise(self._falling.coordinates, (255, 255, 255))
 
     def move_right(self):
         self.colourise(self._falling.coordinates, (0, 0, 0))
-        self._falling.rel_move((0, 1))
+        self._falling.rel_move((1, 0))
         self.colourise(self._falling.coordinates, (255, 255, 255))
 
     def rotate_block(self):
@@ -77,6 +80,6 @@ class Grid(object):
         self.colourise(self._falling.coordinates, (255, 255, 255))
 
     def draw_grid(self, screen):
-        for column in self._grid:
-            for tile in column:
+        for row in self._grid:
+            for tile in row:
                 draw.rect(screen, tile.colour, tile)
