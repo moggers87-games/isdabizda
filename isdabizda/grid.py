@@ -13,8 +13,7 @@ class SquareException(Exception):
     pass
 
 class Tile(Rect):
-    """City tile, containing various data
-    """
+    """A simple tile on the screen, has colour"""
     colour = (0, 0, 0)
 
     def __init__(self, x, y, size):
@@ -30,7 +29,12 @@ class Tile(Rect):
 
 
 class Grid(object):
-    """Contains tiles"""
+    """The actual game grid
+
+    Although we store tiles by row (and thus must fetch them by `y` and then
+    `x`, all public interfaces accept coordinates in the traditional (x, y)
+    format
+    """
     def __init__(self, grid_size, tile_size=TILE_SIZE):
         self.sizes = (grid_size[0], tile_size)
         self._grid = []
@@ -48,6 +52,11 @@ class Grid(object):
         self.colourise(self._falling.coordinates, (255, 255, 255))
 
     def colourise(self, coords, colour):
+        """Colour in a list of coordinates
+
+        Raises an IndexError if the tiles will be outside the grid (except the
+        top side, which is just silently ignored)
+        """
         for x, y in coords:
             if y < 0:
                 continue
@@ -57,29 +66,38 @@ class Grid(object):
             tile.colour = colour
 
     def get_tile(self, x, y):
+        """Grab the tile at (x, y)"""
         return self._grid[y][x]
 
     def move_down(self):
+        """Move the current block down"""
         self.colourise(self._falling.coordinates, (0, 0, 0))
         self._falling.rel_move((0, 1))
         self.colourise(self._falling.coordinates, (255, 255, 255))
 
     def move_left(self):
+        """Move the current block left"""
         self.colourise(self._falling.coordinates, (0, 0, 0))
         self._falling.rel_move((-1, 0))
         self.colourise(self._falling.coordinates, (255, 255, 255))
 
     def move_right(self):
+        """Move the current block right"""
         self.colourise(self._falling.coordinates, (0, 0, 0))
         self._falling.rel_move((1, 0))
         self.colourise(self._falling.coordinates, (255, 255, 255))
 
     def rotate_block(self):
+        """Rotate the block clockwise"""
         self.colourise(self._falling.coordinates, (0, 0, 0))
         self._falling.rotate()
         self.colourise(self._falling.coordinates, (255, 255, 255))
 
     def draw_grid(self, screen):
+        """Draw the grid on the given display surface
+
+        Should be called any time the grid is updated
+        """
         for row in self._grid:
             for tile in row:
                 draw.rect(screen, tile.colour, tile)
