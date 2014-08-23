@@ -1,4 +1,5 @@
 from random import randint
+import copy
 
 from pygame import Rect, draw
 
@@ -36,7 +37,7 @@ class Grid(object):
     format
     """
     def __init__(self, grid_size, tile_size=TILE_SIZE):
-        self.sizes = (grid_size[0], tile_size)
+        self.sizes = copy.deepcopy(grid_size)
         self._grid = []
         self._falling = None
 
@@ -47,6 +48,9 @@ class Grid(object):
                 tile = Tile(x, y, tile_size)
                 row.append(tile)
 
+        self.new_object()
+
+    def new_object(self):
         self._falling = Falling()
         self._falling.rel_move((self.sizes[0]/2, 1))
         self.colourise(self._falling.coordinates, (255, 255, 255))
@@ -57,12 +61,15 @@ class Grid(object):
         Raises an IndexError if the tiles will be outside the grid (except the
         top side, which is just silently ignored)
         """
+        tiles_to_update = []
         for x, y in coords:
             if y < 0:
                 continue
             elif x < 0:
                 raise IndexError("list index out of range")
-            tile = self.get_tile(x, y)
+            tiles_to_update.append(self.get_tile(x, y))
+
+        for tile in tiles_to_update:
             tile.colour = colour
 
     def get_tile(self, x, y):
@@ -71,27 +78,50 @@ class Grid(object):
 
     def move_down(self):
         """Move the current block down"""
+        old_coords = copy.deepcopy(self._falling.coordinates)
         self.colourise(self._falling.coordinates, (0, 0, 0))
         self._falling.rel_move((0, 1))
-        self.colourise(self._falling.coordinates, (255, 255, 255))
+
+        try:
+            self.colourise(self._falling.coordinates, (255, 255, 255))
+        except IndexError:
+            self.colourise(old_coords, (255, 255, 255))
+            self.new_object()
 
     def move_left(self):
         """Move the current block left"""
         self.colourise(self._falling.coordinates, (0, 0, 0))
         self._falling.rel_move((-1, 0))
-        self.colourise(self._falling.coordinates, (255, 255, 255))
+
+        try:
+            self.colourise(self._falling.coordinates, (255, 255, 255))
+        except IndexError:
+            self._falling.rel_move((1, 0))
+            self.colourise(self._falling.coordinates, (255, 255, 255))
 
     def move_right(self):
         """Move the current block right"""
         self.colourise(self._falling.coordinates, (0, 0, 0))
         self._falling.rel_move((1, 0))
-        self.colourise(self._falling.coordinates, (255, 255, 255))
+
+        try:
+            self.colourise(self._falling.coordinates, (255, 255, 255))
+        except IndexError:
+            self._falling.rel_move((-1, 0))
+            self.colourise(self._falling.coordinates, (255, 255, 255))
 
     def rotate_block(self):
         """Rotate the block clockwise"""
         self.colourise(self._falling.coordinates, (0, 0, 0))
         self._falling.rotate()
-        self.colourise(self._falling.coordinates, (255, 255, 255))
+
+        try:
+            self.colourise(self._falling.coordinates, (255, 255, 255))
+        except IndexError:
+            # work out which side we've hit
+            # if we've hit the left or right side, bounce
+            # if we're at the bottom, lock and create new object
+            pass
 
     def draw_grid(self, screen):
         """Draw the grid on the given display surface

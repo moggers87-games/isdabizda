@@ -10,7 +10,7 @@ grid = Grid(SMALL)
 
 ## options
 RES = grid.sizes[0] * grid.sizes[1]
-RES = (RES,RES)
+RES = (RES/2 ,RES/2)
 TITLE = "Isdabizda!"
 FPS = 15
 
