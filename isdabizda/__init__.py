@@ -14,7 +14,8 @@ RES = grid.sizes[0] * grid.sizes[1]
 RES = (RES/2 ,RES/2)
 TITLE = "Isdabizda!"
 FPS = 15
-
+SKIP_TICKS = 2 # input cooldown
+DOWN_TICKS = FPS # ticks before we drop down
 
 DISPLAY_SURF = pygame.display.set_mode(RES)
 ZOOMABLE_SURF = pygame.Surface(RES)
@@ -30,8 +31,11 @@ def update_display():
 
 update_display()
 
-# loop
+skips_left = 0
+ticks_left = DOWN_TICKS*2
+# main loop
 while True:
+    #check for events, e.g. QUIT or INCREASE_EVENT
     for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
@@ -43,19 +47,34 @@ while True:
             grid.extend(4,4)
             update_display()
 
+    # auto dropping of blocks
+    if ticks_left > 0:
+        ticks_left = ticks_left - 1
+    else:
+        ticks_left = DOWN_TICKS
+        grid.move_down()
+        update_display()
+
+    # keyboard stuff
     pressed = pygame.key.get_pressed()
-    if pressed[K_LEFT] == 1:
+    if skips_left > 0:
+        skips_left = skips_left - 1
+    elif pressed[K_LEFT] == 1:
         grid.move_left()
         update_display()
+        skips_left = SKIP_TICKS
     elif pressed[K_RIGHT] == 1:
         grid.move_right()
         update_display()
+        skips_left = SKIP_TICKS
     elif pressed[K_DOWN] == 1:
         grid.move_down()
         update_display()
+        skips_left = SKIP_TICKS
     elif pressed[K_UP] == 1:
         grid.rotate_block()
         update_display()
+        skips_left = SKIP_TICKS
     elif pressed[K_q] == 1 or pressed[K_ESCAPE] == 1:
         pygame.event.post(pygame.event.Event(QUIT))
     clock.tick(FPS)
