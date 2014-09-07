@@ -2,6 +2,7 @@ from random import randint
 import copy
 
 from pygame import Rect, draw
+import pygame.event
 
 from .entities import Falling
 
@@ -9,6 +10,8 @@ SMALL = (32, 32)
 MEDIUM = (128, 128)
 LARGE = (512, 512)
 TILE_SIZE = 16
+
+INCREASE_EVENT = 29
 
 class SquareException(Exception):
     pass
@@ -43,6 +46,7 @@ class Grid(object):
         self.sizes = copy.deepcopy(grid_size)
         self._grid = []
         self._falling = None
+        self.tile_size = tile_size
 
         for y in xrange(grid_size[1]):
             row = []
@@ -56,7 +60,10 @@ class Grid(object):
     def new_object(self):
         self._falling = Falling()
         self._falling.rel_move((self.sizes[0]/2, 1))
-        self.colourise(self._falling.coordinates, (255, 255, 255))
+        try:
+            self.colourise(self._falling.coordinates, (255, 255, 255))
+        except CollisionException:
+            pygame.event.post(pygame.event.Event(INCREASE_EVENT))
 
     def colourise(self, coords, colour):
         """Colour in a list of coordinates
@@ -80,8 +87,32 @@ class Grid(object):
         for tile in tiles_to_update:
             tile.colour = colour
 
+    def extend(self, x_incr=0, y_incr=0):
+        old_size = copy.copy(self.sizes)
+        self.sizes = (self.sizes[0] + 2 * x_incr, self.sizes[1] + 2 * y_incr)
+        new_grid = []
+
+        for y in xrange(self.sizes[1]):
+            row = []
+            new_grid.append(row)
+            for x in xrange(self.sizes[0]):
+                tile = Tile(x, y, self.tile_size)
+                row.append(tile)
+
+        for y in xrange(old_size[1]):
+            for x in xrange(old_size[0]):
+                old_tile = self.get_tile(x, y)
+                tile = new_grid[y+(2*y_incr)][x+x_incr]
+                tile.colour = old_tile.colour
+
+        self._grid = new_grid
+
+        self.new_object()
+
     def get_tile(self, x, y):
         """Grab the tile at (x, y)"""
+        if x < 0 or y < 0:
+            raise IndexError("list index out of range")
         return self._grid[y][x]
 
     def move_down(self):

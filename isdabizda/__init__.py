@@ -4,7 +4,7 @@ from pygame.locals import *
 import pygame
 import pygame.event
 
-from isdabizda.grid import Grid, SMALL
+from isdabizda.grid import Grid, SMALL, INCREASE_EVENT
 
 pygame.init()
 grid = Grid(SMALL)
@@ -33,6 +33,10 @@ while True:
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
+        elif event.type == INCREASE_EVENT:
+            grid.extend(4,4)
+            update_display()
+
     pressed = pygame.key.get_pressed()
     if pressed[K_LEFT] == 1:
         grid.move_left()
