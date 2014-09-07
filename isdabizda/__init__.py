@@ -17,12 +17,15 @@ FPS = 15
 
 
 DISPLAY_SURF = pygame.display.set_mode(RES)
+ZOOMABLE_SURF = pygame.Surface(RES)
 pygame.display.set_caption(TITLE)
 
 clock = pygame.time.Clock()
 
 def update_display():
-    grid.draw_grid(DISPLAY_SURF)
+    grid.draw_grid(ZOOMABLE_SURF)
+    scaled_surface = pygame.transform.smoothscale(ZOOMABLE_SURF, RES)
+    DISPLAY_SURF.blit(scaled_surface, (0,0))
     pygame.display.flip()
 
 update_display()
@@ -34,6 +37,9 @@ while True:
             pygame.quit()
             sys.exit()
         elif event.type == INCREASE_EVENT:
+            grid_size = ZOOMABLE_SURF.get_size()
+            inrc_size = (8*grid.tile_size, 8*grid.tile_size)
+            ZOOMABLE_SURF = pygame.transform.scale(ZOOMABLE_SURF, (grid_size[0]+inrc_size[0],grid_size[1]+inrc_size[1]))
             grid.extend(4,4)
             update_display()
 

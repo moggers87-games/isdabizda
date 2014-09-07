@@ -58,6 +58,7 @@ class Grid(object):
         self.new_object()
 
     def new_object(self):
+        """Replace the current falling block"""
         self._falling = Falling()
         self._falling.rel_move((self.sizes[0]/2, 1))
         try:
@@ -87,7 +88,25 @@ class Grid(object):
         for tile in tiles_to_update:
             tile.colour = colour
 
+    def detect_tetris(self, coords):
+        """Detect if we have any full rows
+
+        Return True if a line was detected
+        """
+        out = False
+        rows = set([pair[1] for pair in coords])
+        for row in rows:
+            tiles = [tile.colour == (255, 255, 255) for tile in self._grid[row]]
+            if False in tiles:
+                continue
+            else:
+                out = True
+                pygame.event.post(pygame.event.Event(INCREASE_EVENT))
+
+        return out
+
     def extend(self, x_incr=0, y_incr=0):
+        """Extend the grid, there is no losing"""
         old_size = copy.copy(self.sizes)
         self.sizes = (self.sizes[0] + 2 * x_incr, self.sizes[1] + 2 * y_incr)
         new_grid = []
@@ -125,7 +144,8 @@ class Grid(object):
             self.colourise(self._falling.coordinates, (255, 255, 255))
         except (IndexError, CollisionException):
             self.colourise(old_coords, (255, 255, 255))
-            self.new_object()
+            if not self.detect_tetris(old_coords):
+                self.new_object()
 
     def move_left(self):
         """Move the current block left"""
