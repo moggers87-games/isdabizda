@@ -41,10 +41,10 @@ class Grid(object):
         self._grid = []
         self._falling = None
 
-        for y in xrange(grid_size[0]):
+        for y in xrange(grid_size[1]):
             row = []
             self._grid.append(row)
-            for x in xrange(grid_size[1]):
+            for x in xrange(grid_size[0]):
                 tile = Tile(x, y, tile_size)
                 row.append(tile)
 
@@ -121,7 +121,15 @@ class Grid(object):
             # work out which side we've hit
             # if we've hit the left or right side, bounce
             # if we're at the bottom, lock and create new object
-            pass
+            x, y = self._falling.coordinates[0]
+            x_mid = self.sizes[0]/2
+            y_mid = self.sizes[1]/2
+            if x < x_mid:
+                self._falling.rel_move((2, 0))
+                self.colourise(self._falling.coordinates, (255, 255, 255))
+            elif x > x_mid:
+                self._falling.rel_move((-2, 0))
+                self.colourise(self._falling.coordinates, (255, 255, 255))
 
     def draw_grid(self, screen):
         """Draw the grid on the given display surface
