@@ -13,6 +13,9 @@ TILE_SIZE = 16
 class SquareException(Exception):
     pass
 
+class CollisionException(Exception):
+    pass
+
 class Tile(Rect):
     """A simple tile on the screen, has colour"""
     colour = (0, 0, 0)
@@ -69,6 +72,11 @@ class Grid(object):
                 raise IndexError("list index out of range")
             tiles_to_update.append(self.get_tile(x, y))
 
+        if colour != (0, 0, 0):
+            detect_old_blocks = [tile.colour == (255, 255, 255) for tile in tiles_to_update]
+            if True in detect_old_blocks:
+                raise CollisionException("There's another block here")
+
         for tile in tiles_to_update:
             tile.colour = colour
 
@@ -78,13 +86,13 @@ class Grid(object):
 
     def move_down(self):
         """Move the current block down"""
-        old_coords = copy.deepcopy(self._falling.coordinates)
+        old_coords = copy.copy(self._falling.coordinates)
         self.colourise(self._falling.coordinates, (0, 0, 0))
         self._falling.rel_move((0, 1))
 
         try:
             self.colourise(self._falling.coordinates, (255, 255, 255))
-        except IndexError:
+        except (IndexError, CollisionException):
             self.colourise(old_coords, (255, 255, 255))
             self.new_object()
 
@@ -95,7 +103,7 @@ class Grid(object):
 
         try:
             self.colourise(self._falling.coordinates, (255, 255, 255))
-        except IndexError:
+        except (IndexError, CollisionException):
             self._falling.rel_move((1, 0))
             self.colourise(self._falling.coordinates, (255, 255, 255))
 
@@ -106,12 +114,13 @@ class Grid(object):
 
         try:
             self.colourise(self._falling.coordinates, (255, 255, 255))
-        except IndexError:
+        except (IndexError, CollisionException):
             self._falling.rel_move((-1, 0))
             self.colourise(self._falling.coordinates, (255, 255, 255))
 
     def rotate_block(self):
         """Rotate the block clockwise"""
+        old_coords = copy.copy(self._falling.coordinates)
         self.colourise(self._falling.coordinates, (0, 0, 0))
         self._falling.rotate()
 
@@ -130,6 +139,9 @@ class Grid(object):
             elif x > x_mid:
                 self._falling.rel_move((-2, 0))
                 self.colourise(self._falling.coordinates, (255, 255, 255))
+        except CollisionException:
+            self.colourise(old_coords, (255, 255, 255))
+            self.new_object()
 
     def draw_grid(self, screen):
         """Draw the grid on the given display surface
