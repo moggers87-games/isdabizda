@@ -18,5 +18,5 @@ Make sure PyGame is installed and run the following:
 Controls
 --------
 
-Hit the arrow keys to manipulate the current block. Hit the "x" in the corner
-to exit.
+Hit the arrow keys to manipulate the current block. "q" or escape will quit the
+game.

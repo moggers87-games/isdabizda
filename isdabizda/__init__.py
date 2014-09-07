@@ -1,7 +1,8 @@
-import pygame
 import sys
 
 from pygame.locals import *
+import pygame
+import pygame.event
 
 from isdabizda.grid import Grid, SMALL
 
@@ -45,4 +46,6 @@ while True:
     elif pressed[K_UP] == 1:
         grid.rotate_block()
         update_display()
+    elif pressed[K_q] == 1 or pressed[K_ESCAPE] == 1:
+        pygame.event.post(pygame.event.Event(QUIT))
     clock.tick(FPS)
