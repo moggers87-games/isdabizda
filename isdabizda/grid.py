@@ -42,6 +42,8 @@ class Grid(object):
     `x`, all public interfaces accept coordinates in the traditional (x, y)
     format
     """
+    background = (0, 0, 0)
+
     def __init__(self, grid_size, tile_size=TILE_SIZE):
         self.sizes = copy.deepcopy(grid_size)
         self._grid = []
@@ -62,7 +64,7 @@ class Grid(object):
         self._falling = Falling()
         self._falling.rel_move((self.sizes[0]/2, 1))
         try:
-            self.colourise(self._falling.coordinates, (255, 255, 255))
+            self.colourise(self._falling.coordinates, self._falling.colour)
         except CollisionException:
             pygame.event.post(pygame.event.Event(INCREASE_EVENT))
 
@@ -80,8 +82,8 @@ class Grid(object):
                 raise IndexError("list index out of range")
             tiles_to_update.append(self.get_tile(x, y))
 
-        if colour != (0, 0, 0):
-            detect_old_blocks = [tile.colour == (255, 255, 255) for tile in tiles_to_update]
+        if colour != self.background:
+            detect_old_blocks = [tile.colour != self.background for tile in tiles_to_update]
             if True in detect_old_blocks:
                 raise CollisionException("There's another block here")
 
@@ -96,7 +98,7 @@ class Grid(object):
         out = False
         rows = set([pair[1] for pair in coords])
         for row in rows:
-            tiles = [tile.colour == (255, 255, 255) for tile in self._grid[row]]
+            tiles = [tile.colour != self.background for tile in self._grid[row]]
             if False in tiles:
                 continue
             else:
@@ -137,46 +139,46 @@ class Grid(object):
     def move_down(self):
         """Move the current block down"""
         old_coords = copy.copy(self._falling.coordinates)
-        self.colourise(self._falling.coordinates, (0, 0, 0))
+        self.colourise(self._falling.coordinates, self.background)
         self._falling.rel_move((0, 1))
 
         try:
-            self.colourise(self._falling.coordinates, (255, 255, 255))
+            self.colourise(self._falling.coordinates, self._falling.colour)
         except (IndexError, CollisionException):
-            self.colourise(old_coords, (255, 255, 255))
+            self.colourise(old_coords, self._falling.colour)
             if not self.detect_tetris(old_coords):
                 self.new_object()
 
     def move_left(self):
         """Move the current block left"""
-        self.colourise(self._falling.coordinates, (0, 0, 0))
+        self.colourise(self._falling.coordinates, self.background)
         self._falling.rel_move((-1, 0))
 
         try:
-            self.colourise(self._falling.coordinates, (255, 255, 255))
+            self.colourise(self._falling.coordinates, self._falling.colour)
         except (IndexError, CollisionException):
             self._falling.rel_move((1, 0))
-            self.colourise(self._falling.coordinates, (255, 255, 255))
+            self.colourise(self._falling.coordinates, self._falling.colour)
 
     def move_right(self):
         """Move the current block right"""
-        self.colourise(self._falling.coordinates, (0, 0, 0))
+        self.colourise(self._falling.coordinates, self.background)
         self._falling.rel_move((1, 0))
 
         try:
-            self.colourise(self._falling.coordinates, (255, 255, 255))
+            self.colourise(self._falling.coordinates, self._falling.colour)
         except (IndexError, CollisionException):
             self._falling.rel_move((-1, 0))
-            self.colourise(self._falling.coordinates, (255, 255, 255))
+            self.colourise(self._falling.coordinates, self._falling.colour)
 
     def rotate_block(self):
         """Rotate the block clockwise"""
         old_coords = copy.copy(self._falling.coordinates)
-        self.colourise(self._falling.coordinates, (0, 0, 0))
+        self.colourise(self._falling.coordinates, self.background)
         self._falling.rotate()
 
         try:
-            self.colourise(self._falling.coordinates, (255, 255, 255))
+            self.colourise(self._falling.coordinates, self._falling.colour)
         except IndexError:
             # work out which side we've hit
             # if we've hit the left or right side, bounce
@@ -186,12 +188,12 @@ class Grid(object):
             y_mid = self.sizes[1]/2
             if x < x_mid:
                 self._falling.rel_move((2, 0))
-                self.colourise(self._falling.coordinates, (255, 255, 255))
+                self.colourise(self._falling.coordinates, self._falling.colour)
             elif x > x_mid:
                 self._falling.rel_move((-2, 0))
-                self.colourise(self._falling.coordinates, (255, 255, 255))
+                self.colourise(self._falling.coordinates, self._falling.colour)
         except CollisionException:
-            self.colourise(old_coords, (255, 255, 255))
+            self.colourise(old_coords, self._falling.colour)
             self.new_object()
 
     def draw_grid(self, screen):

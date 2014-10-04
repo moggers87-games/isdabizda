@@ -11,10 +11,23 @@ TYPES = (
     [(0,0), (0,1), (1,0), (1,1)], # O
     )
 
+BLOCK_COLOURS = (
+    (255, 0, 0),
+    (0, 255, 0),
+    (0, 0, 255),
+    (255, 255, 0),
+    (255, 0, 255),
+    (0, 255, 255),
+    (255, 20, 147),
+    (50, 205, 50),
+    (80, 0, 80),
+)
+
 class Falling(object):
     """A falling block"""
     def __init__(self):
         self.coordinates = copy.deepcopy(random.choice(TYPES))
+        self.colour = random.choice(BLOCK_COLOURS)
 
     def __repr__(self):
         return "<{0}.{1} object at {2}>".format(
