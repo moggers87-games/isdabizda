@@ -6,9 +6,11 @@ import pygame.event
 
 from .entities import Falling
 
-SMALL = (32, 32)
-MEDIUM = (128, 128)
-LARGE = (512, 512)
+SIZES = {
+    "small": (10, 22),
+    "medium": (20, 44),
+    "large": (40, 88),
+}
 TILE_SIZE = 16
 
 INCREASE_EVENT = 29

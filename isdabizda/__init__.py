@@ -1,17 +1,24 @@
+import argparse
 import sys
 
 from pygame.locals import *
 import pygame
 import pygame.event
 
-from isdabizda.grid import Grid, SMALL, INCREASE_EVENT
+from isdabizda.grid import Grid, SIZES, TILE_SIZE, INCREASE_EVENT
+
+parser = argparse.ArgumentParser(description="Futiltris clone")
+parser.add_argument("--grid", choices=["small", "medium", "large"], default="small")
+args = parser.parse_args()
+
 
 pygame.init()
-grid = Grid(SMALL)
+grid = Grid(SIZES[args.grid])
 
 ## options
-RES = grid.sizes[0] * grid.sizes[1]
-RES = (RES/2 ,RES/2)
+X_RES = grid.sizes[0] * TILE_SIZE
+Y_RES = grid.sizes[1] * TILE_SIZE
+RES = (X_RES ,Y_RES)
 TITLE = "Isdabizda!"
 FPS = 15
 SKIP_TICKS = 2 # input cooldown
