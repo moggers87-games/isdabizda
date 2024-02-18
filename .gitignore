@@ -1,2 +1,6 @@
-*.pyc
+/export
 *.swp
+/.haxelib
+/.installed-deps-*
+/node_modules
+/.version

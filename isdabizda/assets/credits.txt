@@ -1,0 +1,3 @@
+Originally a Python game by Matt Molyneaux, rewritten by Matt Molyneaux in Haxe.
+
+Code available at https://github.com/moggers87-games/isdabizda
