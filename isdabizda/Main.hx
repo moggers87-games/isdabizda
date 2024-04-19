@@ -1,11 +1,50 @@
 package isdabizda;
 
+class Polyomino {
+	var shape:Array<Array<Int>>;
+
+	public function new(shape:Array<Array<Int>>) {
+		this.shape = shape;
+	}
+}
+
+class Tetrominos {
+	var shapes:Array<Polyomino> = [
+		/* I */
+		new Polyomino([[1, 1, 1, 1]]),
+		/* O */
+		new Polyomino([[1, 1], [1, 1]]),
+		/* T */
+		new Polyomino([[1, 1, 1], [0, 1, 0]]),
+		/* J */
+		new Polyomino([[0, 1], [0, 1], [1, 1]]),
+		/* L */
+		new Polyomino([[1, 0], [1, 0], [1, 1]]),
+		/* S */
+		new Polyomino([[0, 1, 1], [1 , 1, 0]]),
+		/* Z */
+		new Polyomino([[1, 1, 0], [0, 1, 1]]),
+	];
+}
+
+class FallingBlock {
+	var shape:Polyomino;
+	var colour:Int;
+
+	function new(shape:Polyomino, colour:Int) {
+		this.shape = shape;
+		this.colour = colour;
+	}
+}
+
 class Main extends hxd.App {
 
 	var gridHeight:Int;
 	var gridWidth:Int;
 	var group:h2d.TileGroup;
 	var tile:h2d.Tile;
+
+	var currentPolyomino:Polyomino;
 
 	public function new() {
 		super();
@@ -52,6 +91,6 @@ class Main extends hxd.App {
 	}
 
 	override function update(dt:Float) {
-		keyboardMovement();
+		/*keyboardMovement();*/
 	}
 }
