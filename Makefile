@@ -88,8 +88,11 @@ export/hl/README.md:
 	cp misc/README-hl.md $@ || cp README.md $@
 
 export/hl: export/hl/hlboot.dat export/hl/assets export/hl/README.md export/hl/$(NAME) $(foreach lib,$(HASHLINK_LIBS),export/hl/$(lib))
-	$(TAR_CMD) --create --gzip --file $(NAME)-hl-$(VERSION).tar.gz --exclude=$@/src --transform "s/^export\/hl/$(NAME)/" $@
-	mv $(NAME)-hl-$(VERSION).tar.gz $@
+
+.PHONY: package-hl
+package-hl: export/hl
+	$(TAR_CMD) --create --gzip --file $(NAME)-hl-$(VERSION).tar.gz --exclude=export/hl/src --transform "s/^export\/hl/$(NAME)/" export/hl
+	mv $(NAME)-hl-$(VERSION).tar.gz export/hl
 	$(DATE_CMD) -Iseconds
 
 export/native/src/$(NAME).c: $(SOURCE) .installed-deps-haxe-native
@@ -110,8 +113,11 @@ export/native/README.md:
 	cp misc/README-native.md $@ || cp README.md $@
 
 export/native: export/native/$(NAME) export/native/assets export/native/README.md
-	$(TAR_CMD) --create --gzip --file $(NAME)-native-$(UNAME)-$(VERSION).tar.gz --exclude=$@/src --transform "s/^export\/native/$(NAME)/" $@
-	mv $(NAME)-native-$(UNAME)-$(VERSION).tar.gz $@
+
+.PHONY: package-native
+package-native: export/native
+	$(TAR_CMD) --create --gzip --file $(NAME)-native-$(UNAME)-$(VERSION).tar.gz --exclude=export/native/src --transform "s/^export\/native/$(NAME)/" export/native
+	mv $(NAME)-native-$(UNAME)-$(VERSION).tar.gz export/native
 	$(DATE_CMD) -Iseconds
 
 export/js/assets:
@@ -131,12 +137,18 @@ export/js/README.md:
 	cp misc/README-js.md $@ || cp README.md $@
 
 export/js: export/js/$(NAME).js export/js/index.html export/js/assets export/js/README.md
-	$(TAR_CMD) --create --gzip --file $(NAME)-js-$(VERSION).tar.gz --transform "s/^export\/js/$(NAME)/" $@
-	mv $(NAME)-js-$(VERSION).tar.gz $@
+
+.PHONY: package-js
+package-js: export/js
+	$(TAR_CMD) --create --gzip --file $(NAME)-js-$(VERSION).tar.gz --transform "s/^export\/js/$(NAME)/" export/js
+	mv $(NAME)-js-$(VERSION).tar.gz export/js
 	$(DATE_CMD) -Iseconds
 
 export/source: $(SOURCE)
-	mkdir -p $@
+
+.PHONY: package-source
+package-source: export/source
+	mkdir -p export/source
 	echo $(VERSION) > .version
 	git archive --output=export/source/$(NAME)-source-$(VERSION).tar.gz --prefix=$(NAME)/ --format=tar.gz --add-file=.version HEAD
 	rm .version
