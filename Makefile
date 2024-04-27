@@ -102,7 +102,7 @@ export/native/src/$(NAME).c: $(SOURCE) .installed-deps-haxe-native
 
 export/native/$(NAME): export/native/src/$(NAME).c $(HASHLINK_DIR)/libhl.a
 	mkdir -p $(@D)
-	gcc $(CFLAGS) -o $@ -std=c11 -I$(@D)/src -I$(HASHLINK_DIR)/src $(@D)/src/$(NAME).c $(HASHLINK_DIR)/libhl.a $(LIBFLAGS) -lSDL2 -lm -lopenal -lpthread -lpng -lz -lvorbisfile -luv -lturbojpeg $(LIBOPENGL)
+	$(CC) $(CFLAGS) -o $@ -std=c11 -I$(@D)/src -I$(HASHLINK_DIR)/src $(@D)/src/$(NAME).c $(HASHLINK_DIR)/libhl.a $(LIBFLAGS) -lSDL2 -lm -lopenal -lpthread -lpng -lz -lvorbisfile -luv -lturbojpeg $(LIBOPENGL)
 
 export/native/assets:
 	mkdir -p $@
