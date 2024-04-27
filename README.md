@@ -6,7 +6,7 @@ Falling blocks game that lasts forever.
 
 Hit the arrow keys to manipulate the current block
 
-History
+## History
 
 Originally, this game started out as a sort of clone of
 [Futilitris](http://twinbeard.com/140_futilitris). I'd never actually played
