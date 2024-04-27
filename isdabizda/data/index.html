@@ -1,0 +1,48 @@
+<!DOCTYPE>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui" />
+    <title>isdabizda</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            background-color: black;
+            min-height: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #webgl {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        #wrapper {
+            overflow: hidden;
+            width: 100% !important;
+            height: 100% !important;
+        }
+    </style>
+    <script>
+        window.addEventListener("resize", () => {
+            let height = window.innerHeight;
+            document.querySelector("html").style.height = height;
+            document.querySelector("body").style.height = height;
+            let width = window.innerWidth;
+            document.querySelector("html").style.width = width;
+            document.querySelector("body").style.width = width;
+        });
+        window.document.addEventListener("DOMContentLoaded", () => {
+            window.dispatchEvent(new Event("resize"));
+        });
+    </script>
+</head>
+<body>
+    <div id="wrapper">
+        <canvas id="webgl" globalEvents="1"></canvas>
+    </div>
+    <script type="text/javascript" src="isdabizda.js"></script>
+</body>
+</html>
