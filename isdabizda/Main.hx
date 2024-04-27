@@ -143,6 +143,7 @@ class Board {
 	public var width(default, null):Int;
 	public var height(default, null):Int;
 	var board:Array<Array<Null<Int>>>;
+	static final increaseFactor = 2;
 
 	public function new(width:Int, height:Int) {
 		this.width = width;
@@ -155,7 +156,8 @@ class Board {
 			return new Cell(-1, x, y, null);
 		}
 		var index = y * height + x;
-		return new Cell(index, x, y, board[y][x]);
+		var value = board[y][x];
+		return new Cell(index, x, y, value);
 	}
 
 	public function set(x, y, value) {
@@ -164,6 +166,34 @@ class Board {
 
 	public function iterator():BoardIterator {
 		return new BoardIterator(this);
+	}
+
+	public function growBoard() {
+		var newBoard:Array<Array<Null<Int>>>;
+		var newWidth = width * increaseFactor;
+		var newHeight = height * increaseFactor;
+		newBoard = [for (y in 0...newHeight) [for (x in 0...newWidth) null]];
+		var xOffset = Std.int((newWidth - width) / 2);
+		var yOffset = newHeight - height;
+
+		for (cell in this) {
+			var newY = cell.y + yOffset;
+			var newX = cell.x + xOffset;
+			var value = cell.value;
+			newBoard[newY][newX] = value;
+		}
+		board = newBoard;
+		width = newWidth;
+		height = newHeight;
+	}
+
+	public function lineClear() {
+		for (row in board) {
+			if (!row.contains(null)) {
+				growBoard();
+				return;
+			}
+		}
 	}
 }
 
@@ -303,6 +333,7 @@ class Main extends hxd.App {
 				/* TODO check that we're not too near the top or that we have a
 				 * complete line */
 				currentBlock.remove();
+				board.lineClear();
 				currentBlock = randomBlock();
 				redrawGrid();
 			}
