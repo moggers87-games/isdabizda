@@ -109,7 +109,6 @@ class FallingBlock {
 			parent.addChildAt(block, 1);
 			coordinates.push(pos.copy());
 		}
-		relativeMove(x, y);
 	}
 
 	public function relativeMove(x:Int, y:Int):Bool {
@@ -370,7 +369,12 @@ class Main extends hxd.App {
 		 * find the highest point a new block can be inserted and still be
 		 * able to spin */
 		var tetromino:Polyomino = Tetrominos.SHAPES[index];
-		return new FallingBlock(tetromino, Std.int(board.width / 2), tetromino.size(), board, s2d);
+		var block = new FallingBlock(tetromino, Std.int(board.width / 2), tetromino.size(), board, s2d);
+		if (!block.relativeMove(Std.int(board.width / 2), tetromino.size())) {
+			board.growBoard();
+			block.relativeMove(Std.int(board.width / 2), tetromino.size());
+		}
+		return block;
 	}
 
 	override function update(dt:Float) {
