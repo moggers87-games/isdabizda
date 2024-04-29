@@ -2,7 +2,16 @@ package isdabizda;
 
 import gameUtils.RandomUtils;
 
+enum abstract BoardConstants(Int) from Int to Int {
+	var increaseFactor = 2;
+	var blockColour = 0x1F001F;
+	var backgroundColour = 0xFFFFFF;
+	var initialHeight = 20;
+	var initialWidth = 10;
+}
+
 class Controls {
+
 	public static final SPIN:haxe.ds.ReadOnlyArray<Int> = [hxd.Key.UP];
 	public static final DROP:haxe.ds.ReadOnlyArray<Int> = [hxd.Key.DOWN];
 	public static final MOVELEFT:haxe.ds.ReadOnlyArray<Int> = [hxd.Key.LEFT];
@@ -19,6 +28,7 @@ class Controls {
 }
 
 class Polyomino {
+
 	public var coordinates(default, null):Array<Array<Int>>;
 	public var colour(default, null):Int;
 
@@ -26,28 +36,59 @@ class Polyomino {
 		this.coordinates = coordinates;
 		this.colour = colour;
 	}
+
+	public function size():Int {
+		var maxX = 0;
+		var maxY = 0;
+		var minX = 0;
+		var minY = 0;
+		for (pos in coordinates) {
+			if (pos[0] > maxX) {
+				maxX = pos[0];
+			}
+			else if (pos[0] < minX) {
+				minX = pos[0];
+			}
+			if (pos[1] > maxY) {
+				maxY = pos[1];
+			}
+			else if (pos[1] < minY) {
+				minY = pos[1];
+			}
+		}
+		var differenceX:Int = maxX - minX;
+		var differenceY:Int = maxY - minY;
+		if (differenceX > differenceY) {
+			return differenceX;
+		}
+		else {
+			return differenceY;
+		}
+	}
 }
 
 class Tetrominos {
-	static public var shapes:Array<Polyomino> = [
+
+	public static final SHAPES:Array<Polyomino> = [
 		/* I */
-		new Polyomino(0xe81416, [[0,0], [0,1], [0,2], [0,-1]]),
+		new Polyomino(0xE81416, [[0, 0], [0, 1], [0, 2], [0, -1]]),
 		/* O */
-		new Polyomino(0xffa500, [[0,0], [0,1], [1,0], [1,1]]),
+		new Polyomino(0xFFA500, [[0, 0], [0, 1], [1, 0], [1, 1]]),
 		/* T */
-		new Polyomino(0xfaeb36, [[0,0], [0,1], [0,-1], [1,0]]),
+		new Polyomino(0xFAEB36, [[0, 0], [0, 1], [0, -1], [1, 0]]),
 		/* J */
-		new Polyomino(0x79c314, [[0,0], [-1,0], [1,0], [1,-1]]),
+		new Polyomino(0x79C314, [[0, 0], [-1, 0], [1, 0], [1, -1]]),
 		/* L */
-		new Polyomino(0x487de7, [[0,0], [-1,0], [1,0], [1,1]]),
+		new Polyomino(0x487DE7, [[0, 0], [-1, 0], [1, 0], [1, 1]]),
 		/* S */
-		new Polyomino(0x4b369d, [[0,0], [0,1], [1,0], [1,-1]]),
+		new Polyomino(0x4B369D, [[0, 0], [0, 1], [1, 0], [1, -1]]),
 		/* Z */
-		new Polyomino(0x70369d, [[0,0], [0,-1], [1,0], [1,1]]),
+		new Polyomino(0x70369D, [[0, 0], [0, -1], [1, 0], [1, 1]]),
 	];
 }
 
 class FallingBlock {
+
 	var shape:Polyomino;
 	var coordinates:Array<Array<Int>>;
 	var colour:Int;
@@ -85,8 +126,8 @@ class FallingBlock {
 
 	public function rotate(?clockwise = true):Bool {
 		var newCoords:Array<Array<Int>> = [];
-		var zero = coordinates[0].copy();
-		var rotateVector = [1, -1];
+		var zero:Array<Int> = coordinates[0].copy();
+		var rotateVector:Array<Int> = [1, -1];
 		if (!clockwise) {
 			rotateVector = [-1, 1];
 		}
@@ -121,7 +162,7 @@ class FallingBlock {
 
 	function checkCollision(checkCoords:Array<Array<Int>>):Bool {
 		for (pos in checkCoords) {
-			var cell = board.get(pos[0], pos[1]);
+			var cell:Cell = board.get(pos[0], pos[1]);
 			if (cell.value != null || cell.index < 0) {
 				return true;
 			}
@@ -131,7 +172,7 @@ class FallingBlock {
 
 	public function remove() {
 		for (pos in coordinates) {
-			board.set(pos[0], pos[1], 0x1F001F);
+			board.set(pos[0], pos[1], BoardConstants.blockColour);
 		}
 		for (obj in objects) {
 			obj.remove();
@@ -140,10 +181,10 @@ class FallingBlock {
 }
 
 class Board {
+
 	public var width(default, null):Int;
 	public var height(default, null):Int;
 	var board:Array<Array<Null<Int>>>;
-	static final increaseFactor = 2;
 
 	public function new(width:Int, height:Int) {
 		this.width = width;
@@ -155,9 +196,8 @@ class Board {
 		if (x >= width || y >= height || x < 0 || y < 0) {
 			return new Cell(-1, x, y, null);
 		}
-		var index = y * height + x;
-		var value = board[y][x];
-		return new Cell(index, x, y, value);
+		var index:Int = y * height + x;
+		return new Cell(index, x, y, board[y][x]);
 	}
 
 	public function set(x, y, value) {
@@ -169,17 +209,16 @@ class Board {
 	}
 
 	public function growBoard() {
-		var newBoard:Array<Array<Null<Int>>>;
-		var newWidth = width * increaseFactor;
-		var newHeight = height * increaseFactor;
-		newBoard = [for (y in 0...newHeight) [for (x in 0...newWidth) null]];
-		var xOffset = Std.int((newWidth - width) / 2);
-		var yOffset = newHeight - height;
+		var newWidth:Int = width * BoardConstants.increaseFactor;
+		var newHeight:Int = height * BoardConstants.increaseFactor;
+		var newBoard:Array<Array<Null<Int>>> = [for (y in 0...newHeight) [for (x in 0...newWidth) null]];
+		var xOffset:Int = Std.int((newWidth - width) / 2);
+		var yOffset:Int = newHeight - height;
 
 		for (cell in this) {
-			var newY = cell.y + yOffset;
-			var newX = cell.x + xOffset;
-			var value = cell.value;
+			var newY:Int = cell.y + yOffset;
+			var newX:Int = cell.x + xOffset;
+			var value:Null<Int> = cell.value;
 			newBoard[newY][newX] = value;
 		}
 		board = newBoard;
@@ -198,26 +237,29 @@ class Board {
 }
 
 class BoardIterator {
+
 	var board:Board;
-	var index:Int = 0;
+	var index:Int;
 
 	public inline function new(board:Board) {
 		this.board = board;
+		index = 0;
 	}
 
-	public inline function hasNext() {
+	public inline function hasNext():Bool {
 		return index < board.width * board.height;
 	}
 
-	public inline function next() {
-		var x = index % board.width;
-		var y = Std.int(index / board.width);
+	public inline function next():Cell {
+		var x:Int = index % board.width;
+		var y:Int = Std.int(index / board.width);
 		index++;
 		return board.get(x, y);
 	}
 }
 
 class Cell {
+
 	public var index(default, null):Int;
 	public var x(default, null):Int;
 	public var y(default, null):Int;
@@ -231,11 +273,10 @@ class Cell {
 	}
 }
 
-
 class Main extends hxd.App {
+
 	var board:Board;
 	var group:h2d.TileGroup;
-	var tile:h2d.Tile;
 
 	var currentBlock:FallingBlock;
 
@@ -245,11 +286,12 @@ class Main extends hxd.App {
 
 	public function new() {
 		super();
-		board = new Board(10, 20);
+		board = new Board(BoardConstants.initialWidth, BoardConstants.initialHeight);
 	}
 
 	override function init() {
-		group = new h2d.TileGroup(tile, s2d);
+		/*group = new h2d.TileGroup(h2d.Tile.fromColor(BoardConstants.backgroundColour, 1, 1), s2d);*/
+		group = new h2d.TileGroup(null, s2d);
 		currentBlock = randomBlock();
 		s2d.addEventListener(keyboardControl);
 		redrawGrid();
@@ -261,13 +303,14 @@ class Main extends hxd.App {
 	}
 
 	function cacheDrawValues() {
-		var xRatio = s2d.width / board.width;
-		var yRatio = s2d.height / board.height;
+		var xRatio:Float = s2d.width / board.width;
+		var yRatio:Float = s2d.height / board.height;
 		if (xRatio * board.height < s2d.height) {
 			ratio = xRatio;
 			yOffset = (s2d.height - (ratio * board.height)) / 2;
 			xOffset = 0;
-		} else {
+		}
+		else {
 			ratio = yRatio;
 			yOffset = 0;
 			xOffset = (s2d.width - (ratio * board.width)) / 2;
@@ -278,14 +321,16 @@ class Main extends hxd.App {
 		group.clear();
 		cacheDrawValues();
 		for (cell in board) {
-			var xPos = cell.x * ratio + xOffset;
-			var yPos = cell.y * ratio + yOffset;
+			var tile:h2d.Tile;
+			var xPos:Float = cell.x * ratio + xOffset;
+			var yPos:Float = cell.y * ratio + yOffset;
 			if (cell.value != null) {
-				var tile = h2d.Tile.fromColor(cell.value, 1, 1);
+				tile = h2d.Tile.fromColor(cell.value, 1, 1);
 				tile.setSize(ratio, ratio);
 				group.add(xPos, yPos, tile);
-			} else {
-				var tile = h2d.Tile.fromColor(0xFFFFFF, 1, 1);
+			}
+			else {
+				tile = h2d.Tile.fromColor(BoardConstants.backgroundColour, 1, 1);
 				tile.setSize(ratio, ratio);
 				group.add(xPos, yPos, tile);
 			}
@@ -319,19 +364,21 @@ class Main extends hxd.App {
 		redrawGrid();
 	}
 
-	function randomBlock() {
-		var index = RandomUtils.randomInt(0, Tetrominos.shapes.length);
+	function randomBlock():FallingBlock {
+		var index:Int = RandomUtils.randomInt(0, Tetrominos.SHAPES.length);
 		/* TODO calculate the largest dimension of a polyomino and use that to
 		 * find the highest point a new block can be inserted and still be
 		 * able to spin */
-		return new FallingBlock(Tetrominos.shapes[index], Std.int(board.width / 2), 3, board, s2d);
+		var tetromino:Polyomino = Tetrominos.SHAPES[index];
+		return new FallingBlock(tetromino, Std.int(board.width / 2), tetromino.size(), board, s2d);
 	}
 
 	override function update(dt:Float) {
 		if ((hxd.Timer.frameCount % hxd.Timer.wantedFPS) == 0) {
 			if (!currentBlock.relativeMove(0, 1)) {
 				/* TODO check that we're not too near the top or that we have a
-				 * complete line */
+				 * complete line
+				 */
 				currentBlock.remove();
 				board.lineClear();
 				currentBlock = randomBlock();
