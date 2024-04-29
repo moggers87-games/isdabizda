@@ -365,9 +365,6 @@ class Main extends hxd.App {
 
 	function randomBlock():FallingBlock {
 		var index:Int = RandomUtils.randomInt(0, Tetrominos.SHAPES.length);
-		/* TODO calculate the largest dimension of a polyomino and use that to
-		 * find the highest point a new block can be inserted and still be
-		 * able to spin */
 		var tetromino:Polyomino = Tetrominos.SHAPES[index];
 		var block = new FallingBlock(tetromino, Std.int(board.width / 2), tetromino.size(), board, s2d);
 		if (!block.relativeMove(Std.int(board.width / 2), tetromino.size())) {
@@ -380,9 +377,6 @@ class Main extends hxd.App {
 	override function update(dt:Float) {
 		if ((hxd.Timer.frameCount % hxd.Timer.wantedFPS) == 0) {
 			if (!currentBlock.relativeMove(0, 1)) {
-				/* TODO check that we're not too near the top or that we have a
-				 * complete line
-				 */
 				currentBlock.remove();
 				board.lineClear();
 				currentBlock = randomBlock();
