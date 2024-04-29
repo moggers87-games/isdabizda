@@ -278,6 +278,7 @@ class Main extends hxd.App {
 	var group:h2d.TileGroup;
 
 	var currentBlock:FallingBlock;
+	var blockFallFrames:Float;
 
 	var ratio:Float;
 	var xOffset:Float;
@@ -314,6 +315,8 @@ class Main extends hxd.App {
 			yOffset = 0;
 			xOffset = (s2d.width - (ratio * board.width)) / 2;
 		}
+		var fallFactor:Float = (BoardConstants.initialHeight / board.height) * (BoardConstants.initialHeight / board.height);
+		blockFallFrames = Math.max(1.0, fallFactor * hxd.Timer.wantedFPS);
 	}
 
 	function redrawGrid() {
@@ -375,7 +378,7 @@ class Main extends hxd.App {
 	}
 
 	override function update(dt:Float) {
-		if ((hxd.Timer.frameCount % hxd.Timer.wantedFPS) == 0) {
+		if ((hxd.Timer.frameCount % blockFallFrames) == 0) {
 			if (!currentBlock.relativeMove(0, 1)) {
 				currentBlock.remove();
 				board.lineClear();
