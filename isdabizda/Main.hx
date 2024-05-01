@@ -169,9 +169,11 @@ class FallingBlock {
 		return false;
 	}
 
-	public function remove() {
-		for (pos in coordinates) {
-			board.set(pos[0], pos[1], BoardConstants.blockColour);
+	public function remove(?paint = true) {
+		if (paint) {
+			for (pos in coordinates) {
+				board.set(pos[0], pos[1], BoardConstants.blockColour);
+			}
 		}
 		for (obj in objects) {
 			obj.remove();
@@ -225,13 +227,14 @@ class Board {
 		height = newHeight;
 	}
 
-	public function lineClear() {
+	public function lineClear():Int {
+		var count = 0;
 		for (row in board) {
 			if (!row.contains(null)) {
-				growBoard();
-				return;
+				count += 1;
 			}
 		}
+		return count;
 	}
 }
 
@@ -279,6 +282,7 @@ class Main extends hxd.App {
 
 	var currentBlock:FallingBlock;
 	var blockFallFrames:Float;
+	var extraBlocks:Array<FallingBlock>;
 
 	var ratio:Float;
 	var xOffset:Float;
@@ -287,6 +291,7 @@ class Main extends hxd.App {
 	public function new() {
 		super();
 		board = new Board(BoardConstants.initialWidth, BoardConstants.initialHeight);
+		extraBlocks = [];
 	}
 
 	override function init() {
@@ -379,13 +384,36 @@ class Main extends hxd.App {
 
 	override function update(dt:Float) {
 		if ((hxd.Timer.frameCount % blockFallFrames) == 0) {
-			if (!currentBlock.relativeMove(0, 1)) {
-				currentBlock.remove();
+			return;
+		}
+		if (!currentBlock.relativeMove(0, 1)) {
+			currentBlock.remove();
+			var count:Int = board.lineClear();
+			if (count > 0) {
+				board.growBoard();
+			}
+			currentBlock = randomBlock();
+			redrawGrid();
+		}
+		currentBlock.render(ratio, xOffset, yOffset);
+
+		if (extraBlocks.length > 0) {
+			var updateRequired = false;
+			var i = 0;
+			while (i < extraBlocks.length) {
+				i++;
+				var block:FallingBlock = extraBlocks[i];
+				if (!block.relativeMove(0, 1)) {
+					extraBlocks.splice(i, 1);
+					block.remove();
+					updateRequired = true;
+					i--;
+				}
+			}
+			if (updateRequired) {
 				board.lineClear();
-				currentBlock = randomBlock();
 				redrawGrid();
 			}
 		}
-		currentBlock.render(ratio, xOffset, yOffset);
 	}
 }
