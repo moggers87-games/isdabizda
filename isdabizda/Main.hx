@@ -96,7 +96,7 @@ class FallingBlock {
 	var objects:Array<h2d.Bitmap>;
 	var board:Board;
 
-	public function new(shape:Polyomino, x:Int, y:Int, board:Board, parent:h2d.Object) {
+	public function new(shape:Polyomino, board:Board, parent:h2d.Object) {
 		this.shape = shape;
 		this.parent = parent;
 		this.board = board;
@@ -105,8 +105,8 @@ class FallingBlock {
 		/* TODO use batch rendering via SpriteBatch */
 		for (pos in shape.coordinates) {
 			var block = new h2d.Bitmap(h2d.Tile.fromColor(shape.colour, 1, 1));
-			objects.push(block);
 			parent.addChildAt(block, 1);
+			objects.push(block);
 			coordinates.push(pos.copy());
 		}
 	}
@@ -374,7 +374,7 @@ class Main extends hxd.App {
 	function randomBlock():FallingBlock {
 		var index:Int = RandomUtils.randomInt(0, Tetrominos.SHAPES.length);
 		var tetromino:Polyomino = Tetrominos.SHAPES[index];
-		var block = new FallingBlock(tetromino, Std.int(board.width / 2), tetromino.size(), board, s2d);
+		var block = new FallingBlock(tetromino, board, s2d);
 		if (!block.relativeMove(Std.int(board.width / 2), tetromino.size())) {
 			board.growBoard();
 			block.relativeMove(Std.int(board.width / 2), tetromino.size());
@@ -382,38 +382,60 @@ class Main extends hxd.App {
 		return block;
 	}
 
-	override function update(dt:Float) {
-		if ((hxd.Timer.frameCount % blockFallFrames) == 0) {
-			return;
+	function addExtraBlocks(count:Int) {
+		var i = 0;
+		while (i < count) {
+			i++;
+			var index:Int = RandomUtils.randomInt(0, Tetrominos.SHAPES.length);
+			var tetromino:Polyomino = Tetrominos.SHAPES[index];
+			var block = new FallingBlock(tetromino, board, s2d);
+			var multiplier = i;
+			if (i % 2 == 0) {
+				multiplier = (multiplier - 1) * -1;
+			}
+			var x = Std.int(board.width / 2) + ((tetromino.size() + 1) * multiplier);
+			if (!block.relativeMove(x, tetromino.size())) {
+				block.remove(false);
+			} else {
+				extraBlocks.push(block);
+			}
 		}
-		if (!currentBlock.relativeMove(0, 1)) {
+	}
+
+	override function update(dt:Float) {
+		var naturalFall = hxd.Timer.frameCount % blockFallFrames == 0;
+		var updateRequired = false;
+		if (naturalFall && !currentBlock.relativeMove(0, 1)) {
 			currentBlock.remove();
 			var count:Int = board.lineClear();
 			if (count > 0) {
 				board.growBoard();
 			}
+			if (count > 1) {
+				addExtraBlocks(count);
+			}
 			currentBlock = randomBlock();
-			redrawGrid();
+			updateRequired = true;
 		}
 		currentBlock.render(ratio, xOffset, yOffset);
 
 		if (extraBlocks.length > 0) {
-			var updateRequired = false;
 			var i = 0;
 			while (i < extraBlocks.length) {
-				i++;
 				var block:FallingBlock = extraBlocks[i];
 				if (!block.relativeMove(0, 1)) {
 					extraBlocks.splice(i, 1);
 					block.remove();
 					updateRequired = true;
-					i--;
+				} else {
+					block.render(ratio, xOffset, yOffset);
 				}
+				i++;
 			}
-			if (updateRequired) {
-				board.lineClear();
-				redrawGrid();
-			}
+		}
+		if (updateRequired) {
+			board.lineClear();
+			redrawGrid();
 		}
 	}
 }
