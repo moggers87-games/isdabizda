@@ -20,10 +20,23 @@ DATE_CMD = gdate
 LIB_EXT = dylib
 endif
 
-HASHLINK_VERSION = df137d0408725ef564fd8d9defd3322a3cd3b91a
+HASHLINK_VERSION = 3ba32e4fe81d6a82f6e91762e15aaba5eb5546f9
 HASHLINK_DIR = hashlink-$(HASHLINK_VERSION)
 HASHLINK_URL = https://github.com/HaxeFoundation/hashlink/archive/$(HASHLINK_VERSION).tar.gz
 HASHLINK_LIBS = libhl.$(LIB_EXT) fmt.hdll ui.hdll uv.hdll sdl.hdll openal.hdll
+
+define HLSTATIC
+include Makefile
+
+libhl.a: $${LIB} $${FMT} $${SDL} $${SSL} $${OPENAL} $${UI} $${UV}
+	ar rcs $$@ $$^
+
+clean_a:
+	rm -rf libhl.a
+endef
+export HLSTATIC
+
+HASHLINK_MAKEFILE = Makestatic
 
 .PHONY: all
 all: export/js export/hl export/native
@@ -33,7 +46,7 @@ release: all export/source
 
 .PHONY: clean-hashlink
 clean-hashlink:
-	(cd $(HASHLINK_DIR) && make clean) || true
+	(cd $(HASHLINK_DIR) && make clean && make -f $(HASHLINK_MAKEFILE) clean_a) || true
 
 .PHONY: clean
 clean: clean-hashlink
@@ -66,8 +79,14 @@ lint: .haxelib
 $(HASHLINK_DIR):
 	curl -L $(HASHLINK_URL) | tar -xz
 
-$(HASHLINK_DIR)/hl $(HASHLINK_DIR)/libhl.a: $(HASHLINK_DIR)
+$(HASHLINK_DIR)/$(HASHLINK_MAKEFILE): $(HASHLINK_DIR)
+	echo "$$HLSTATIC" >> $@
+
+$(HASHLINK_DIR)/hl: $(HASHLINK_DIR)
 	cd $(@D) && make
+
+$(HASHLINK_DIR)/libhl.a: $(HASHLINK_DIR)/$(HASHLINK_MAKEFILE)
+	cd $(@D) && make -f $(HASHLINK_MAKEFILE) libhl.a
 
 export/hl/$(NAME): $(HASHLINK_DIR)/hl
 	cp $(HASHLINK_DIR)/hl $@
