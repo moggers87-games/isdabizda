@@ -3,7 +3,7 @@ SOURCE := $(shell find $(NAME) -type f)
 VERSION := $(shell cat .version || git describe --long --dirty || git describe --long --dirty --all | sed 's/\//-/g')
 UNAME := $(shell uname)
 
-CFLAGS = -O3
+CFLAGS = -Wall -O3
 LIBFLAGS =
 LIBOPENGL = -lGL
 TAR_CMD = tar
@@ -46,7 +46,7 @@ release: all export/source
 
 .PHONY: clean-hashlink
 clean-hashlink:
-	(cd $(HASHLINK_DIR) && make clean && make -f $(HASHLINK_MAKEFILE) clean_a) || true
+	(cd $(HASHLINK_DIR) && make clean && make -f $(HASHLINK_MAKEFILE) clean_a && rm -f $(HASHLINK_MAKEFILE)) || true
 
 .PHONY: clean
 clean: clean-hashlink
@@ -83,10 +83,10 @@ $(HASHLINK_DIR)/$(HASHLINK_MAKEFILE): $(HASHLINK_DIR)
 	echo "$$HLSTATIC" >> $@
 
 $(HASHLINK_DIR)/hl: $(HASHLINK_DIR)
-	cd $(@D) && make
+	cd $(@D) && make CC="$(CC) -D_GNU_SOURCE=1 -D_REENTRANT"
 
 $(HASHLINK_DIR)/libhl.a: $(HASHLINK_DIR)/$(HASHLINK_MAKEFILE)
-	cd $(@D) && make -f $(HASHLINK_MAKEFILE) libhl.a
+	cd $(@D) && make -f $(HASHLINK_MAKEFILE) CC="$(CC) -D_GNU_SOURCE=1 -D_REENTRANT" libhl.a
 
 export/hl/$(NAME): $(HASHLINK_DIR)/hl
 	cp $(HASHLINK_DIR)/hl $@
@@ -121,7 +121,7 @@ export/native/src/$(NAME).c: $(SOURCE) .installed-deps-haxe-native
 
 export/native/$(NAME): export/native/src/$(NAME).c $(HASHLINK_DIR)/libhl.a
 	mkdir -p $(@D)
-	$(CC) $(CFLAGS) -o $@ -std=c11 -I$(@D)/src -I$(HASHLINK_DIR)/src $(@D)/src/$(NAME).c $(HASHLINK_DIR)/libhl.a $(LIBFLAGS) -lSDL2 -lm -lopenal -lpthread -lpng -lz -lvorbisfile -luv -lturbojpeg $(LIBOPENGL)
+	$(CC) $(CFLAGS) -o $@ -std=c11 -I$(@D)/src -I$(HASHLINK_DIR)/src $(@D)/src/$(NAME).c $(HASHLINK_DIR)/libhl.a $(LIBFLAGS) -lSDL2 -lopenal -lpthread -lm -lpng -lz -lvorbisfile -luv -lturbojpeg $(LIBOPENGL)
 
 export/native/assets:
 	mkdir -p $@
