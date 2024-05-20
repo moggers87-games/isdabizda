@@ -20,6 +20,7 @@ DATE_CMD = gdate
 LIB_EXT = dylib
 endif
 
+# remember to update hashlink.hxml too
 HASHLINK_VERSION = 3ba32e4fe81d6a82f6e91762e15aaba5eb5546f9
 HASHLINK_DIR = hashlink-$(HASHLINK_VERSION)
 HASHLINK_URL = https://github.com/HaxeFoundation/hashlink/archive/$(HASHLINK_VERSION).tar.gz

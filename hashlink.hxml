@@ -1,2 +1,2 @@
 compile.hxml
---library hlsdl:1.14.0
+--library hlsdl:git:https://github.com/HaxeFoundation/hashlink#3ba32e4fe81d6a82f6e91762e15aaba5eb5546f9
