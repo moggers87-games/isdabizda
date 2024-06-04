@@ -3,8 +3,10 @@ SOURCE := $(shell find $(NAME) -type f)
 VERSION := $(shell cat .version || git describe --long --dirty || git describe --long --dirty --all | sed 's/\//-/g')
 UNAME := $(shell uname)
 
-CFLAGS = -Wall -O3
-LIBFLAGS =
+LBITS := $(shell getconf LONG_BIT)
+MARCH ?= $(LBITS)
+CFLAGS = -Wall -O3 -m$(MARCH) -fPIC -pthread -fno-omit-frame-pointer
+LIBFLAGS = -lSDL2 -lopenal -lpthread -lm -lpng -lz -lvorbisfile -luv -lturbojpeg $(LIBOPENGL)
 LIBOPENGL = -lGL
 TAR_CMD = tar
 DATE_CMD = date
@@ -21,7 +23,7 @@ LIB_EXT = dylib
 endif
 
 # remember to update hashlink.hxml too
-HASHLINK_VERSION = 3ba32e4fe81d6a82f6e91762e15aaba5eb5546f9
+HASHLINK_VERSION = 8f5519dd8f25d82de94b9f2c5e32534a9db312db
 HASHLINK_DIR = hashlink-$(HASHLINK_VERSION)
 HASHLINK_URL = https://github.com/HaxeFoundation/hashlink/archive/$(HASHLINK_VERSION).tar.gz
 HASHLINK_LIBS = libhl.$(LIB_EXT) fmt.hdll ui.hdll uv.hdll sdl.hdll openal.hdll
@@ -122,7 +124,7 @@ export/native/src/$(NAME).c: $(SOURCE) .installed-deps-haxe-native
 
 export/native/$(NAME): export/native/src/$(NAME).c $(HASHLINK_DIR)/libhl.a
 	mkdir -p $(@D)
-	$(CC) $(CFLAGS) -o $@ -std=c11 -I$(@D)/src -I$(HASHLINK_DIR)/src $(@D)/src/$(NAME).c $(HASHLINK_DIR)/libhl.a $(LIBFLAGS) -lSDL2 -lopenal -lpthread -lm -lpng -lz -lvorbisfile -luv -lturbojpeg $(LIBOPENGL)
+	$(CC) $(CFLAGS) -o $@ -std=c11 -I$(@D)/src -I$(HASHLINK_DIR)/src $(@D)/src/$(NAME).c $(HASHLINK_DIR)/libhl.a $(LIBFLAGS)
 
 export/native/assets:
 	mkdir -p $@
