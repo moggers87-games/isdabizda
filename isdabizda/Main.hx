@@ -92,21 +92,15 @@ class FallingBlock {
 	var shape:Polyomino;
 	var coordinates:Array<Array<Int>>;
 	var colour:Int;
-	var parent:h2d.Object;
-	var objects:Array<h2d.Bitmap>;
 	var board:Board;
+	var graphic:h2d.Graphics;
 
 	public function new(shape:Polyomino, board:Board, parent:h2d.Object) {
 		this.shape = shape;
-		this.parent = parent;
 		this.board = board;
-		objects = [];
 		coordinates = [];
-		/* TODO use batch rendering via SpriteBatch */
+		graphic = new h2d.Graphics(parent);
 		for (pos in shape.coordinates) {
-			var block = new h2d.Bitmap(h2d.Tile.fromColor(shape.colour, 1, 1));
-			parent.addChildAt(block, 1);
-			objects.push(block);
 			coordinates.push(pos.copy());
 		}
 	}
@@ -147,16 +141,46 @@ class FallingBlock {
 		return false;
 	}
 
-	public function render(size, xOffset, yOffset) {
-		for (idx => block in objects) {
-			var pos:Array<Int>;
-
-			block.height = size;
-			block.width = size;
-			pos = coordinates[idx];
-			block.x = pos[0] * size + xOffset;
-			block.y = pos[1] * size + yOffset;
+	public function render(size:Float, xOffset, yOffset) {
+		graphic.clear();
+		for (idx => pos in coordinates) {
+			graphic.beginFill(shape.colour);
+			var x = (pos[0] * size) + xOffset;
+			var y = (pos[1] * size) + yOffset;
+			graphic.drawRect(x, y, size, size);
+			/* shading */
+			var margin = size / 5;
+			if (margin < 1) continue;
+			/* left */
+			graphic.beginFill(0x777777, 0.5);
+			graphic.lineTo(x, y);
+			graphic.lineTo(x + margin, y + margin);
+			graphic.lineTo(x + margin, y + size - margin);
+			graphic.lineTo(x, y + size);
+			graphic.lineTo(x, y);
+			/* top */
+			graphic.beginFill(0xFFFFFF, 0.5);
+			graphic.lineTo(x, y);
+			graphic.lineTo(x + margin, y + margin);
+			graphic.lineTo(x + size - margin, y + margin);
+			graphic.lineTo(x + size, y);
+			graphic.lineTo(x, y);
+			/* right */
+			graphic.beginFill(0xAAAAAA, 0.5);
+			graphic.lineTo(x + size, y);
+			graphic.lineTo(x + size - margin, y + margin);
+			graphic.lineTo(x + size - margin, y + size - margin);
+			graphic.lineTo(x + size, y + size);
+			graphic.lineTo(x + size, y);
+			/* bottom */
+			graphic.beginFill(0x000000, 0.5);
+			graphic.lineTo(x, y + size);
+			graphic.lineTo(x + margin, y + size - margin);
+			graphic.lineTo(x + size - margin, y + size - margin);
+			graphic.lineTo(x + size, y + size);
+			graphic.lineTo(x, y + size);
 		}
+
 	}
 
 	function checkCollision(checkCoords:Array<Array<Int>>):Bool {
@@ -175,9 +199,7 @@ class FallingBlock {
 				board.set(pos[0], pos[1], BoardConstants.blockColour);
 			}
 		}
-		for (obj in objects) {
-			obj.remove();
-		}
+		graphic.remove();
 	}
 }
 
@@ -295,7 +317,7 @@ class Main extends hxd.App {
 	}
 
 	override function init() {
-		/*group = new h2d.TileGroup(h2d.Tile.fromColor(BoardConstants.backgroundColour, 1, 1), s2d);*/
+		engine.backgroundColor = BoardConstants.backgroundColour;
 		group = new h2d.TileGroup(null, s2d);
 		currentBlock = randomBlock();
 		s2d.addEventListener(keyboardControl);
@@ -332,14 +354,9 @@ class Main extends hxd.App {
 			var xPos:Float = cell.x * ratio + xOffset;
 			var yPos:Float = cell.y * ratio + yOffset;
 			if (cell.value != null) {
-				tile = h2d.Tile.fromColor(cell.value, 1, 1);
-				tile.setSize(ratio, ratio);
-				group.add(xPos, yPos, tile);
-			}
-			else {
-				tile = h2d.Tile.fromColor(BoardConstants.backgroundColour, 1, 1);
-				tile.setSize(ratio, ratio);
-				group.add(xPos, yPos, tile);
+				var cellTile = h2d.Tile.fromColor(cell.value);
+				cellTile.setSize(ratio, ratio);
+				group.add(xPos, yPos, cellTile);
 			}
 		}
 
