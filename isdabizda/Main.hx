@@ -12,10 +12,10 @@ enum abstract BoardConstants(Int) from Int to Int {
 
 class Controls {
 
-	public static final SPIN:haxe.ds.ReadOnlyArray<Int> = [hxd.Key.UP];
-	public static final DROP:haxe.ds.ReadOnlyArray<Int> = [hxd.Key.DOWN];
-	public static final MOVELEFT:haxe.ds.ReadOnlyArray<Int> = [hxd.Key.LEFT];
-	public static final MOVERIGHT:haxe.ds.ReadOnlyArray<Int> = [hxd.Key.RIGHT];
+	public static final SPIN:haxe.ds.ReadOnlyArray<Int> = [hxd.Key.UP, hxd.Key.W];
+	public static final DROP:haxe.ds.ReadOnlyArray<Int> = [hxd.Key.DOWN, hxd.Key.S];
+	public static final MOVELEFT:haxe.ds.ReadOnlyArray<Int> = [hxd.Key.LEFT, hxd.Key.A];
+	public static final MOVERIGHT:haxe.ds.ReadOnlyArray<Int> = [hxd.Key.RIGHT, hxd.Key.D];
 
 	public static function isDown(keys:Iterable<Int>):Bool {
 		for (key in keys) {
