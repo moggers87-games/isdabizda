@@ -27,6 +27,46 @@ class Controls {
 	}
 }
 
+class BackgroundShader extends h3d.shader.ScreenShader {
+	static var SRC = {
+		@:import h3d.shader.NoiseLib;
+
+		@global var time:Float;
+		@param var texture:Sampler2D;
+		@param var seed:Int;
+
+		function lines(point:Float):Vec4 {
+			var staticFactor = 15;
+			var timeFactor = time / 10;
+			var sharedFactor = point * staticFactor + timeFactor;
+			var offset = (point - timeFactor) / 3;
+			return vec4(
+				1.0 - smoothstep(1.0, 0.5, abs(sin(sharedFactor + offset))),
+				1.0 - smoothstep(1.0, 0.5, abs(sin(sharedFactor))) * 3,
+				1.0 - smoothstep(1.0, 0.5, abs(sin(sharedFactor - offset))),
+				1.0
+			);
+		}
+
+		function rotate2d(angle:Float):Mat2 {
+			return mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
+		}
+
+		function fragment() {
+			noiseSeed = seed;
+			var pos = input.position;
+			var angle = snoise(pos);
+			pos *= rotate2d(angle);
+			pixelColor = lines(pos.x + pos.y);
+		}
+	}
+
+	public function new() {
+		super();
+		this.seed = RandomUtils.randomInt(0, 2<<15);
+	}
+}
+
 class Polyomino {
 
 	public var coordinates(default, null):Array<Array<Int>>;
@@ -301,6 +341,9 @@ class Main extends hxd.App {
 
 	var board:Board;
 	var group:h2d.TileGroup;
+	var background:h2d.Bitmap;
+	var boardBackground:h2d.Bitmap;
+	var backgroundShader:BackgroundShader;
 
 	var currentBlock:FallingBlock;
 	var blockFallFrames:Float;
@@ -317,7 +360,13 @@ class Main extends hxd.App {
 	}
 
 	override function init() {
-		engine.backgroundColor = BoardConstants.backgroundColour;
+		/* engine.backgroundColor = BoardConstants.backgroundColour; */
+		background = new h2d.Bitmap(h2d.Tile.fromColor(BoardConstants.backgroundColour));
+		backgroundShader = new BackgroundShader();
+		background.filter = new h2d.filter.Shader(backgroundShader);
+		s2d.add(background);
+		boardBackground = new h2d.Bitmap(h2d.Tile.fromColor(BoardConstants.backgroundColour, 1, 1, 0.75));
+		s2d.add(boardBackground);
 		group = new h2d.TileGroup(null, s2d);
 		currentBlock = randomBlock();
 		s2d.addEventListener(keyboardControl);
@@ -347,8 +396,15 @@ class Main extends hxd.App {
 	}
 
 	function redrawGrid() {
+		background.width = s2d.width;
+		background.height = s2d.height;
 		group.clear();
 		cacheDrawValues();
+		boardBackground.width = ratio * board.width;
+		boardBackground.height = ratio * board.height;
+		boardBackground.x = xOffset;
+		boardBackground.y = yOffset;
+
 		for (cell in board) {
 			var tile:h2d.Tile;
 			var xPos:Float = cell.x * ratio + xOffset;
